@@ -19,6 +19,8 @@ import_array();
 #include "core/include/numpy/ndarrayobject.h"
 %}
 
+/* Temporary hack to disable mysql. */
+#define NOMYSQL
 // The following is actually a bit odd.  Is this function
 // never instantiated?
 %ignore EXOAnalysisManager::ParseListOfNames();
@@ -32,6 +34,9 @@ import_array();
 %feature("director") EXOInputModule;
 %include "EXOAnalysisManager/EXOAnalysisModule.hh"
 %include "EXOAnalysisManager/EXOInputModule.hh"
+
+/* Ensuring that we get some information about 
+   exceptions.  FixME: throw an EXO Exception? */
 
 %include "EXOUtilities/EXOChannelMap.hh"
 %include "EXOUtilities/EXOErrorLogger.hh"

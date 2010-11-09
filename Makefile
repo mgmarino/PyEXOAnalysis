@@ -11,7 +11,7 @@ else
 SONAME = so
 endif
 
-EXOANALYSISLIBS = EXOAnalysisManager EXOUtilities EXOReconstruction EXOCalibUtilities EXODBUtilities EXOSim  EXOBinaryPackage
+EXOANALYSISLIBS = EXOAnalysisManager EXOUtilities EXOReconstruction EXOCalibUtilities EXOBinaryPackage #EXODBUtilities EXOSim  EXOBinaryPackage
 EXOANALYSISLIB_FLAGS = $(patsubst %, -l%, $(EXOANALYSISLIBS))
 
 ROOT_INC_FLAGS = -I$(shell root-config --incdir)
@@ -19,7 +19,7 @@ ROOT_CC_FLAGS = $(shell root-config --auxcflags)
 ROOT_LD_FLAGS = $(shell root-config --libs)
 
 
-ifndef EXOLIB
+ifndef EXOOUT
 INCFLAGS = -I../analysis/manager             \
             -I../utilities/misc               \
             -I../utilities/calib              \
@@ -27,8 +27,8 @@ INCFLAGS = -I../analysis/manager             \
             -I../../EXOBinaryPackage          
 EXOLIBFLAGS = -L/tmp/$(shell whoami)/exoout/lib
 else
-INCFLAGS = -I$(EXOLIB)/include -I.
-EXOLIBFLAGS = -L$(EXOLIB)/lib
+INCFLAGS = -I$(EXOOUT)/include -I.
+EXOLIBFLAGS = -L$(EXOOUT)/lib
 endif
 
 INCFLAGS += $(shell $(PYTHONCONF) --includes) \
@@ -36,6 +36,9 @@ INCFLAGS += $(shell $(PYTHONCONF) --includes) \
             -I$(shell $(PYTHON) -c 'import numpy; print numpy.__path__[0]')
 
 CCFLAGS = $(INCFLAGS) $(ROOT_CC_FLAGS) 
+ifndef MYSQL
+CCFLAGS += -DNOMYSQL
+endif
 CXXFLAGS = -Wall -fPIC -O2
 CXX = g++
 LDFLAGS = -shared \
@@ -47,6 +50,7 @@ LDFLAGS = -shared \
 
 INTERFACE_NAME = $(PACKAGE_NAME)_interface.i 
 WRAPPER = $(INTERFACE_NAME:.i=_wrap.cxx)
+WRAPPER_HEADER = $(INTERFACE_NAME:.i=_wrap.h)
 OBJS = $(WRAPPER:.cxx=.o)
 PYTHON_LIB = _$(PACKAGE_NAME).$(SONAME) 
 
@@ -67,4 +71,4 @@ $(PYTHON_LIB): $(OBJS)
 	$(CXX) $(LDFLAGS) $(OBJS) -o $@ 
 
 clean:
-	@rm -rf $(OBJS) $(PYTHON_LIB) $(WRAPPER) $(PACKAGE_NAME).py* _$(PACKAGE_NAME)*
+	@rm -rf $(OBJS) $(PYTHON_LIB) $(WRAPPER) $(PACKAGE_NAME).py* _$(PACKAGE_NAME)* $(WRAPPER_HEADER)

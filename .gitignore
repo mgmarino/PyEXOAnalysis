@@ -1,3 +1,7 @@
 PyEXOAnalysis_interface_wrap.h
 PyEXOAnalysis_interface_wrap.cxx
+PyEXOAnalysis.py
 *.pyc
+*.o
+*.so
+*.dylib
