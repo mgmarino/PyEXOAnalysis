@@ -1,4 +1,4 @@
-import PyEXOAnalysis as EXOoffline
+import pyexo as EXOoffline
 import ROOT
 import array
 import numpy

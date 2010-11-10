@@ -1,0 +1,23 @@
+Copyright November 2010, Michael Marino, michael.marino@ph.tum.de
+
+PyEXOAnalysis (short name 'pyexo') are a set of python
+bindings for the EXO Offline Analysis package.  A more
+complete user reference manual will be completed soon.
+
+
+PyEXOAnalysis is built and installed using the familiar python
+distutils.  To perform a build, please do the following:
+
+python setup.py build
+
+To install:
+
+python setup.py install [--home=[dir/to/install/python/modules]
+
+where the 'home' parameter allows distutils to install into
+a particular location.  This is particular useful when
+installing 'local' python packages when the user does not
+have the appropriate permissions to perform a system-wide
+install.  If this option is used, be sure that the directory
+specified in the passed-in flag is in the list defined
+in the environment variable PYTHONPATH.

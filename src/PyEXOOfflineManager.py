@@ -10,7 +10,7 @@
   This avoids unnecessary loading of unused modules, etc.
 
 """
-class EXOofflineMgr:
+class PyEXOOfflineManager:
 
     def __init__ (self):
 
