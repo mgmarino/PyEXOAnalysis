@@ -1,4 +1,4 @@
-Copyright November 2010, Michael Marino, michael.marino@ph.tum.de
+copyright November 2010, Michael Marino, michael.marino@ph.tum.de
 
 PyEXOAnalysis (short name 'pyexo') are a set of python
 bindings for the EXO Offline Analysis package.  A more
@@ -73,8 +73,8 @@ in pyexo_example.py for how one might use this package.
 
 In addition, further, more 'advanced' examples may be found in:
 
-EXOFFTWAnalysis.py
-EXOSimpleWaveformAnalysis.py
+examples/EXOFFTWAnalysis.py
+examples/EXOSimpleWaveformAnalysis.py
 
 I.4 Cleaning
 
@@ -142,3 +142,7 @@ is only available in the 5.26.00 release.  My environment settings:
 
 This unfortunately breaks from the general EXO setup, but the slight upgrade in ROOT
 software shouldn't make a difference.  
+
+There are examples of batch submission scripts and programs located under:
+
+batch_submission/

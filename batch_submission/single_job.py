@@ -3,9 +3,12 @@ import os
 import sys
 import shutil
 
+"""
+Example of an analysis program submitted to a batch system
+"""
+
 def run_analysis(list_of_input_files, temp_outputdir, final_output_directory):
-    import EXOofflineMgr
-    import PyEXOAnalysis as EXOoffline
+    import pyexo 
     from EXOSimpleWaveformAnalysis import EXOSimpleWaveformAnalysis
    
     import shutil
@@ -14,11 +17,11 @@ def run_analysis(list_of_input_files, temp_outputdir, final_output_directory):
         temp_outputdir = temp_outputdir[0:-1]
     
     for input_file in list_of_input_files:
-        analysis_mgr = EXOofflineMgr.EXOofflineMgr()
+        analysis_mgr = pyexo.PyEXOOfflineManager()
         mgr = analysis_mgr.get_analysis_mgr()
         
         wf_anal = EXOSimpleWaveformAnalysis("wf_anal", mgr)
-        input = EXOoffline.EXOTreeInputModule("EXOTreeInputModule", mgr)
+        input = pyexo.EXOTreeInputModule("EXOTreeInputModule", mgr)
         analysis_mgr.register_module(input, "tinput")
         analysis_mgr.register_module(wf_anal, "wf_anal")
         mgr.ShowRegisteredModules()

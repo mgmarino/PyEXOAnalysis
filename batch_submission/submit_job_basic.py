@@ -14,7 +14,7 @@ list_of_numbers = [
                  421,
                  429,
                  459 ]
-list_of_numbers = [453]
+
 name_of_executable = "/afs/slac.stanford.edu/u/xo/mgmarino/EXOjobs/single_job.py"
 final_directory    = "/nfs/slac/g/exo/mgmarino/EXORunData"
 queue              = "long"
