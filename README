@@ -3,6 +3,8 @@ Copyright November 2010, Michael Marino, michael.marino@ph.tum.de
 PyEXOAnalysis (short name 'pyexo') are a set of python
 bindings for the EXO Offline Analysis package.  A more
 complete user reference manual will be completed soon.
+For the impatient, scroll down to the bottom to get going
+fast.
 
 I. Installation Instructions
 
@@ -11,35 +13,132 @@ distutils.
 
 I.1 Build
 
-  To perform a build, please do the following:
+To perform a build, please do the following:
 
-python setup.py build [--swig=/u/xo/mgmarino/software/bin/swig]
+  >python setup.py build 
 
-  On SLAC machines, please append the last flag (without the 
-  brackets).  The current included distribution of swig on the
-  SLAC computers is too old and this will use the one in my 
-  directory.  Perhaps in the future, this will
-  automatically be added to the EXO software path to ensure
-  this step is avoided. 
+You might receive an error message that SWIG is too old.
+On SLAC machines the current included distribution of swig on the
+SLAC computers is too old and this will use the one in my 
+directory.  Perhaps in the future, this will
+automatically be added to the EXO software path to ensure
+this step is avoided, but for the time being, do:
+
+  >python setup.py build_ext --swig=/afs/slac.stanford.edu/u/xo/mgmarino/software/bin/swig
+  >python setup.py build
+
+This will select an appropriate newer version of swig. 
 
 I.2
 
-  To install:
+To install:
 
-python setup.py install [--home=/dir/to/install/python/modules]
+  >python setup.py install [--home=/dir/to/install/python/modules]
 
 
-  where the 'home' parameter allows distutils to install into
-  a particular location.  This is particular useful when
-  installing 'local' python packages when the user does not
-  have the appropriate permissions to perform a system-wide
-  install.  
-  
-  If this option is used, be sure that the directory
-  specified in the passed-in flag is in the list defined
-  in the environment variable PYTHONPATH.  For example,
-  if '/my/python/directory' is specified with the --home
-  flag, be sure to add '/my/python/directory/lib/python' 
-  to your PYTHONPATH variable.
+where the 'home' parameter allows distutils to install into
+a particular location.  This is particular useful when
+installing 'local' python packages when the user does not
+have the appropriate permissions to perform a system-wide
+install.  
+
+If this option is used, be sure that the directory
+specified in the passed-in flag is in the list defined
+in the environment variable PYTHONPATH.  For example,
+if '/my/python/directory' is specified with the --home
+flag, be sure to add '/my/python/directory/lib/python' 
+to your PYTHONPATH variable.  A good option might be:
+
+  --home=~/software
 
 I.3 Check the installation
+
+After installation, make sure that your python
+path includes the installation location (e.g. 
+properly set the PYTHONPATH evironment variable)
+The try running the following test from the 
+base directory:
+
+  >python test_pyexo.py
+
+The output of this should tell you if something went wrong.
+As well, you can perform an additional test by selecting
+a (preferably small) ROOT file and running the example code
+on this.  For example:
+
+  >python pyexo_example.py . /nfs/slac/g/exo_data2/exo_data/data/WIPP/processed/444/run00000444.root
+
+(That root file is fairly small.)  Try having a look at the code
+in pyexo_example.py for how one might use this package.
+
+In addition, further, more 'advanced' examples may be found in:
+
+EXOFFTWAnalysis.py
+EXOSimpleWaveformAnalysis.py
+
+I.4 Cleaning
+
+At any point, if you want to clean the build directory
+run:
+
+  > python setup.py clean -a
+
+II. Issues, potential problems.
+
+II.1 Slow code
+
+Python is an interpreted language.  As such, you might run into issues with
+slowdowns, etc.  In general, it's a good idea to ensure that the code
+spends most of its time executing compiled code.  Python gives you the possibility
+To check where your code is spending its time.  If you'd like to profile
+your code, just run:
+
+  >python -m cProfile -o output.txt myscript.py
+
+which will output to output.txt and tell you where the code is spending most
+of its time. 
+
+II.2 Errors, exceptions
+
+You might encounter esoteric errors like:
+
+terminate called after throwing an instance of 'Swig::DirectorMethodException'
+
+being thrown by your program.  This is due to the SWIG wrappers encountering
+an exception an python and passing it along to the EXOAnalysis package.
+Since EXOAnalysis knows nothing about these exceptions (and shouldn't, really)
+this aborts the program.  Unfortunately, as of now the SWIG wrapping
+doesn't output the initial python exception making this difficult
+to trackdown.  To give you a better idea of where this is happening, try
+putting the following in your python code:
+
+    try:
+        ... possibly offending code here
+    except Exception, e:
+        print e
+        raise
+
+This will print out the exception error from python before the program
+aborts.
+
+II.3 Running batch jobs with pyexo
+
+The biggest issue with running a batch job with pyexo is that all the batch
+computers are 64-bit and as of now, all standard compilations of the EXO
+software are done on 32-bit machines.  I did try to get 32-bit python
+running on a 64-bit batch machine, but this is very difficult.  (64-bit python
+cannot load 32-bit shared libraries and changing the library search environment
+is very difficult.)  To get around this, I compiled my own EXOAnalysis software
+on a 64-bit machine running RH5.  You will also need 64-bit ROOT which unfortunately
+is only available in the 5.26.00 release.  My environment settings:
+
+  setenv ROOTSYS /afs/slac/package/cernroot/vol19/52200d/Linux26SL4_x86_64_gcc346
+  setenv EXOOUT ${HOME}/software/EXO
+  setenv NOG4
+  
+  # Give access to ROOT in python:
+  setenv PYTHONPATH ${ROOTSYS}/lib
+  setenv PYTHONPATH /afs/slac.stanford.edu/u/xo/mgmarino/software/lib/python:${PYTHONPATH}
+
+This unfortunately breaks from the general EXO setup, but the slight upgrade in ROOT
+software shouldn't make a difference.  

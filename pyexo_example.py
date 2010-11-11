@@ -43,15 +43,20 @@ class EXOExample(pyexo.EXOAnalysisModule):
         work_with            = anarray.reshape(-1, num_per_event)
 
         print "Printing out the waveform array for channel: ", chan_array[0]
-        print work_with[0]
         self.last_array = work_with[0].copy()
+        print self.last_array
         
         return 0
 
     def ShutDown(self):
         # Just to be cute, we can pickle to the output file
-        print "  Finishing Up, pickling a waveform to:", self.base_file_name
-        pickle.dump(self.last_array, open(self.base_file_name, 'wb'))
+        print "  Finishing Up, pickling a waveform to:", self.output_filename
+        try:
+            pickle.dump(self.last_array, open(self.output_filename, 'wb'))
+        except Exception, e:
+            print e
+            raise
+        
         return 0
 
 
@@ -70,7 +75,7 @@ def run_analysis(list_of_input_files, output_directory):
         # instantiations that must happen for initialization.        
         # In general for quick, one-off analyses, the
         # internals will not be important.
-        analysis_mgr = pyexo.PyEXOAnalysisManager()
+        analysis_mgr = pyexo.PyEXOOfflineManager()
 
         # mgr is an EXOAnalysisManager instance
         mgr = analysis_mgr.get_analysis_mgr()
@@ -92,8 +97,9 @@ def run_analysis(list_of_input_files, output_directory):
         # the order of registration is important
         # as the modules will be called in this
         # order in the analysis loop.
+        # The name given is just a nickname, 
         analysis_mgr.register_module(input, "tinput")
-        analysis_mgr.register_module(wf_analysis, "fftw")
+        analysis_mgr.register_module(wf_analysis, "example")
         mgr.ShowRegisteredModules()
         #############################################
  
