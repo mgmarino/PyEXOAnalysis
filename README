@@ -4,20 +4,42 @@ PyEXOAnalysis (short name 'pyexo') are a set of python
 bindings for the EXO Offline Analysis package.  A more
 complete user reference manual will be completed soon.
 
+I. Installation Instructions
 
 PyEXOAnalysis is built and installed using the familiar python
-distutils.  To perform a build, please do the following:
+distutils.  
 
-python setup.py build
+I.1 Build
 
-To install:
+  To perform a build, please do the following:
 
-python setup.py install [--home=[dir/to/install/python/modules]
+python setup.py build [--swig=/u/xo/mgmarino/software/bin/swig]
 
-where the 'home' parameter allows distutils to install into
-a particular location.  This is particular useful when
-installing 'local' python packages when the user does not
-have the appropriate permissions to perform a system-wide
-install.  If this option is used, be sure that the directory
-specified in the passed-in flag is in the list defined
-in the environment variable PYTHONPATH.
+  On SLAC machines, please append the last flag (without the 
+  brackets).  The current included distribution of swig on the
+  SLAC computers is too old and this will use the one in my 
+  directory.  Perhaps in the future, this will
+  automatically be added to the EXO software path to ensure
+  this step is avoided. 
+
+I.2
+
+  To install:
+
+python setup.py install [--home=/dir/to/install/python/modules]
+
+
+  where the 'home' parameter allows distutils to install into
+  a particular location.  This is particular useful when
+  installing 'local' python packages when the user does not
+  have the appropriate permissions to perform a system-wide
+  install.  
+  
+  If this option is used, be sure that the directory
+  specified in the passed-in flag is in the list defined
+  in the environment variable PYTHONPATH.  For example,
+  if '/my/python/directory' is specified with the --home
+  flag, be sure to add '/my/python/directory/lib/python' 
+  to your PYTHONPATH variable.
+
+I.3 Check the installation

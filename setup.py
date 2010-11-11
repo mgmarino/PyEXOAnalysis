@@ -3,14 +3,19 @@ try:
     from distutils.core import setup, Extension
     from distutils.sysconfig import get_python_inc
     from distutils.command.build_py import build_py
+    from distutils.command.build_ext import build_ext
+    from distutils.command.build import build
+    from distutils.command.clean import clean
+    from distutils import log
+    from distutils.errors import *
 except ImportError:
-    print "Error importing distutils (required), please insure it is installed."
+    log.error("Error importing distutils (required), please insure it is installed.")
     raise
 
 try:
     import numpy
 except ImportError:
-    print "Error importing NumPy (required), is it not properly installed?"
+    log.error( "Error importing NumPy (required), is it not properly installed?")
     raise
 
 from os import environ, getcwd
@@ -18,6 +23,8 @@ import os.path
 import subprocess
 import sys
 
+required_swig_version = (1, 3, 36)
+base_name = "PyEXOAnalysis"
 include_dirs  = []
 lib_dirs      = []
 linking_flags = []
@@ -40,9 +47,11 @@ exo_out_dir = environ.get('EXOOUT')
 if not exo_out_dir:
     # Means that there is a tmp installation
     from getpass import getuser
-    print "EXOOUT not defined, assuming the offline software and EXOBinary lives in:"
     exo_out_dir = os.path.join('/tmp', getuser(), 'exoout') 
-    print "  ", exo_out_dir
+    log.warn( """
+EXOOUT not defined, assuming the offline software and EXOBinary lives in:
+  %s
+""" % exo_out_dir)
 
 include_dirs.append(os.path.join(exo_out_dir, 'include'))
 lib_dirs.append(os.path.join(exo_out_dir, 'lib'))
@@ -50,8 +59,7 @@ lib_dirs.append(os.path.join(exo_out_dir, 'lib'))
 # Get ROOT information
 DEVNULL = open('/dev/null', 'wb')
 if subprocess.call(['root-config', '--incdir'], stdout=DEVNULL) != 0:
-    print 'ERROR calling root-config, is it in your path?'
-    sys.exit(1)
+    log.error('ERROR calling root-config, is it in your path?')
 
 include_dirs.append(subprocess.Popen(['root-config', '--incdir'],
                                      stdout=subprocess.PIPE).communicate()[0].strip())
@@ -79,15 +87,76 @@ defines = [('NOMYSQL', '1'),
 
 swig_flags.extend(['-I' + dir for dir in include_dirs])
 
-debug = environ.get("DISTUTILS_DEBUG")
-if debug:
-    print "Include directories: \n ", '\n  '.join(include_dirs)
-    print "Library directories: \n ", '\n  '.join(lib_dirs)
-    print "Liraries:\n "            , '\n  '.join(libs)
-    print "CPP Flags:\n "           , '\n  '.join(cpp_flags)
-    print "SWIG Flags:\n "          , '\n  '.join(swig_flags)
+log.debug("Include directories: \n ", '\n  '.join(include_dirs))
+log.debug("Library directories: \n ", '\n  '.join(lib_dirs))
+log.debug("Liraries:\n "            , '\n  '.join(libs))
+log.debug("CPP Flags:\n "           , '\n  '.join(cpp_flags))
+log.debug("SWIG Flags:\n "          , '\n  '.join(swig_flags))
 
-dist = setup(name         = "PyEXOAnalysis",
+
+class PyEXO_build_ext(build_ext):
+    def swig_sources( self, sources, ext ):
+        import re
+        # Make sure we have an appropriate version of
+        # SWIG
+        log.info( "Checking for swig version >= %i.%i.%i ..." % required_swig_version )
+        swig = self.swig or self.find_swig()
+        temp_swig_out = subprocess.Popen([swig, '-version'],
+                                          stdout=subprocess.PIPE).communicate()[0]
+        temp_swig_out = re.search(".*SWIG Version ([\.0-9]*).*", temp_swig_out).group(1)
+        swig_version = tuple([int(num) for num in temp_swig_out.split('.')])
+        if swig_version >= required_swig_version:
+            log.info("yes")
+            return build_ext.swig_sources(self, sources, ext)
+        log.info("no")
+        log.error("""
+  Required SWIG version not found (version %i.%i.%i found).  Please 
+  update your copy or pass the path to an appropriate swig using 
+  the build_ext option '--swig'.  For example, type both 
+  
+ >python setup.py build_ext --swig=/path/to/swig 
+ >python setup.py build
+  
+  *NOTE*: This error is expected on SLAC machines as the distributed
+  swig version is less than required.  Please try running the  
+  command first:
+
+ >python setup.py build_ext --swig=/u/xo/mgmarino/software/bin/swig
+
+  which should use the correct swig. To bypass this error message
+  and try to continue building, pass the --force flag to the 
+  build command.  As always, be sure to test the installation with
+
+ >python test.py
+
+  after completion!
+                  """ % swig_version)
+        if self.force: 
+            log.warn("force continue")  
+            return build_ext.swig_sources(self, sources, ext)
+        raise DistutilsExecError("SWIG version") 
+
+class PyEXO_build(build):
+    sub_commands = [('build_ext',     build.has_ext_modules),
+                    ('build_py',      build.has_pure_modules),
+                    ('build_clib',    build.has_c_libraries),
+                    ('build_scripts', build.has_scripts),
+                   ]
+
+class PyEXO_clean(clean):
+    def run( self ):
+        clean.run( self )
+        if self.all: 
+            # also trash the swig wrappers
+            for afile in ['src/' + base_name + '.py',
+                          'src/' + base_name + '_interface_wrap.cpp',
+                          'src/' + base_name + '_interface_wrap.h',]:
+                if not os.path.exists(afile): continue
+                os.remove(afile)
+                log.info("removing '%s'", afile)
+
+
+dist = setup(name         = base_name,
              version      = "0.1",
              description  = "Python bindings for the EXOAnalysis offline software package",
              author       = "Michael Marino",
@@ -96,9 +165,11 @@ dist = setup(name         = "PyEXOAnalysis",
              options      = {'build_ext':{'swig_opts': ' '.join(swig_flags)}},
              package_dir  = {'pyexo' : 'src'},
              packages     = ['pyexo'],
-             #ext_package  = "PyEXOAnalysis",
-             ext_modules  = [Extension('pyexo._PyEXOAnalysis',
-                                      ['src/PyEXOAnalysis_interface.i'],
+             cmdclass     = {'build_ext' : PyEXO_build_ext,
+                             'clean'     : PyEXO_clean    , 
+                             'build'     : PyEXO_build    }, 
+             ext_modules  = [Extension('pyexo._' + base_name,
+                                      ['src/%s_interface.i' % base_name],
                                       include_dirs  = include_dirs,
                                       swig_opts     = swig_flags, 
                                       define_macros = defines,
@@ -106,7 +177,3 @@ dist = setup(name         = "PyEXOAnalysis",
                                       libraries     = libs
                                       )])
 
-# Hack to ensure we collect PyEXOAnalysis.py into pyexo
-build_py_run = build_py(dist)
-build_py_run.ensure_finalized()
-build_py_run.run()
