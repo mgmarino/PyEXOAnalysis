@@ -40,9 +40,25 @@ import_array();
 %include "EXOUtilities/EXOErrorLogger.hh"
 %include "EXOUtilities/EXOTalkToManager.hh"
 
+/* MYSQL causes some problems with SWIG.  
+   In particular, we need to be careful
+   since this functions are defined in the
+   header dependent upon whether or
+   not NOMYSQL is set.  Therefore, we
+   shut off the interface and assume
+   that the user has appropriately set
+   up the env variables in his/her setup.*/
+/* If the environment variables are not consistent
+   with the build of EXOAnalysis, you will 
+   get a hard-to-understand malloc error 
+   which indicates that the memory footprint
+   of the object is different in the library
+   that pyexo is expecting. */
 %ignore EXOCalibManager::m_mysqlConn;
-%ignore EXOCalibManager::getMysqlBest();
+%ignore EXOCalibManager::getMysqlBest;
 %ignore EXOCalibManager::makeMysqlConnection();
+%ignore EXOCalibManager::setMysqlOptions;
+%ignore EXOCalibManager::borrowConnection();
 %include "EXOCalibUtilities/EXOCalibManager.hh"
 %include "EXOAnalysisManager/EXOTreeInputModule.hh"
 
