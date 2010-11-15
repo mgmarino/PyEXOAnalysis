@@ -43,7 +43,7 @@ include_dirs.append(get_python_inc(plat_specific=1))
 include_dirs.append(os.path.join(getcwd(), 'src'))
 
 
-exo_out_dir = environ.get('EXOOUT')
+exo_out_dir = environ.get('EXOLIB')
 if not exo_out_dir:
     # Means that there is a tmp installation
     from getpass import getuser
@@ -52,6 +52,29 @@ if not exo_out_dir:
 EXOOUT not defined, assuming the offline software and EXOBinary lives in:
   %s
 """ % exo_out_dir)
+
+
+# We check MYSQL and G4.  This only matters for the interface
+# exported to Python.
+# If the EXOAnalysis package was compiled against those libraries
+# it should still work just fine.  Sometime in the future,
+# support for MYSQL and G4 will be turned on.   
+
+
+defines = []
+
+no_compile_with_mysql = environ.get('NOMYSQL')
+if not no_compile_with_mysql:
+    libs.append('EXODBUtilities')
+else:
+    defines.append(('NOMYSQL', '1'))
+
+no_compile_with_geant4 = environ.get('NOG4')
+if not no_compile_with_geant4:
+    libs.append('EXOSim')
+else:
+    defines.append(('NOG4', '1'))
+
 
 include_dirs.append(os.path.join(exo_out_dir, 'include'))
 lib_dirs.append(os.path.join(exo_out_dir, 'lib'))
@@ -76,14 +99,6 @@ temp_root_cflags = subprocess.Popen(['root-config', '--cflags'],
                                       stdout=subprocess.PIPE).communicate()[0]
 
 cpp_flags.extend( [ word.strip() for word in temp_root_cflags.split() if word[:2] != '-I' ] )
-
-# We shut off MYSQL and G4.  This only matters for the interface
-# exported to Python.
-# If the EXOAnalysis package was compiled against those libraries
-# it should still work just fine.  Sometime in the future,
-# support for MYSQL and G4 will be turned on.   
-defines = [('NOMYSQL', '1'),
-           ('NOG4',    '1')]
 
 swig_flags.extend(['-I' + dir for dir in include_dirs])
 

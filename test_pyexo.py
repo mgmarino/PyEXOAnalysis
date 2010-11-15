@@ -58,3 +58,4 @@ pyexo.
 
 if __name__ == '__main__':
     run_test()
+    print sys.argv[0], "test ended.  If no horrible error output was seen, you should be all set."

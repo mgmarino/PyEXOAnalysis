@@ -2,6 +2,7 @@
         directors="1", 
         allprotected="1") PyEXOAnalysis
 
+/* Temporary hack to disable mysql and G4*/
 %init %{
 import_array();
 %}
@@ -15,12 +16,9 @@ import_array();
 #include "EXOUtilities/EXOEventData.hh"
 #include "EXOCalibUtilities/EXOCalibManager.hh"
 #include "EXOAnalysisManager/EXOTreeInputModule.hh"
-
 #include "core/include/numpy/ndarrayobject.h"
 %}
 
-/* Temporary hack to disable mysql. */
-#define NOMYSQL
 // The following is actually a bit odd.  Is this function
 // never instantiated?
 %ignore EXOAnalysisManager::ParseListOfNames();
@@ -41,6 +39,10 @@ import_array();
 %include "EXOUtilities/EXOChannelMap.hh"
 %include "EXOUtilities/EXOErrorLogger.hh"
 %include "EXOUtilities/EXOTalkToManager.hh"
+
+%ignore EXOCalibManager::m_mysqlConn;
+%ignore EXOCalibManager::getMysqlBest();
+%ignore EXOCalibManager::makeMysqlConnection();
 %include "EXOCalibUtilities/EXOCalibManager.hh"
 %include "EXOAnalysisManager/EXOTreeInputModule.hh"
 
