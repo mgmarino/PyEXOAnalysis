@@ -146,3 +146,30 @@ software shouldn't make a difference.
 There are examples of batch submission scripts and programs located under:
 
 batch_submission/
+
+III.  Special interfaces
+
+SWIG allows you to extend the interface of a defined
+class in C++ beyond what was given.  In particular, this
+is helpful for python-izing class data, etc., so that
+it can be used as a python type instead of some basic
+C or C++ type.  Example of this are the conversion
+of arrays to python arrays (e.g. numpy ndarrays).  This
+section outlines additions to EXOAnalysis interfaces.
+It will detail further additions are they are added
+to the interfaces.
+
+III.1  EXOEventData
+
+get_data_as_ndarray(): returns the data variable in the 
+EXOEventData object as an ndarray.  Note that no copying
+is done and this ndarray uses the memory allocated for 
+data.  Therefore, any change to this array would affect
+the underlying memory.  This is considered generally desirable
+as it avoids memory copying and allows one to possibly
+intentionally adjust the data for upcoming modules. 
+
+get_chan_array_as_ndarray(): as above except that
+it exports the chan array as an ndarray.
+
+
