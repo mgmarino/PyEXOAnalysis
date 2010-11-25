@@ -64,6 +64,9 @@ import_array();
 
 /* Following deals with event data. */
 %rename ("_in") EXOEventData::in;
+%rename ("EXOEventData_scintillation_site") EXOEventData::scintillation_site;
+%ignore EXOEventData::add_scintillation_site;
+%ignore EXOEventData::get_scintillation_site;
 %include "EXOUtilities/EXOEventData.hh"
 /* We extend EXOEventData, adding get_data_as_ndarray. 
    In general, we need to be careful when dealing with
