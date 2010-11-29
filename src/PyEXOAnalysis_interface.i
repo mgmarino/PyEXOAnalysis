@@ -18,6 +18,7 @@ import_array();
 #include "EXOAnalysisManager/EXOTreeInputModule.hh"
 #include "core/include/numpy/ndarrayobject.h"
 %}
+%include stl.i
 
 // The following is actually a bit odd.  Is this function
 // never instantiated?
