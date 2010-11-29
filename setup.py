@@ -63,8 +63,8 @@ EXOOUT not defined, assuming the offline software and EXOBinary lives in:
 
 defines = []
 
-no_compile_with_mysql = environ.get('NOMYSQL')
-if not no_compile_with_mysql:
+compile_with_mysql = environ.get('MYSQL')
+if compile_with_mysql:
     libs.append('EXODBUtilities')
 else:
     defines.append(('NOMYSQL', '1'))
