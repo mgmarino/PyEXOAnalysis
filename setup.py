@@ -36,7 +36,7 @@ libs          = [
                 'EXOCalibUtilities',
                 'EXOBinaryPackage'
                 ]
-swig_flags    = ['-c++', '-dirprot']
+swig_flags    = ['-c++', '-dirprot', '-Wall']
 
 include_dirs.append(numpy.__path__[0])
 include_dirs.append(get_python_inc(plat_specific=1))
@@ -122,34 +122,36 @@ class PyEXO_build_ext(build_ext):
         swig_version = tuple([int(num) for num in temp_swig_out.split('.')])
         if swig_version >= required_swig_version:
             log.info("yes")
-            return build_ext.swig_sources(self, sources, ext)
-        log.info("no")
-        log.error("""
-  Required SWIG version not found (version %i.%i.%i found).  Please 
-  update your copy or pass the path to an appropriate swig using 
+        else:
+            log.info("no")
+            log.error("""
+  Suggested SWIG version not found (version %i.%i.%i found).  
+  This will result in python bindings with reduced funcationalities,
+  in particular the inability to access protected class members in
+  derived python classes. If this functionality is not needed,
+  then ignore this message. 
+
+  One can point the setup to an appropriate swig using 
   the build_ext option '--swig'.  For example, type both 
   
  >python setup.py build_ext --swig=/path/to/swig 
  >python setup.py build
   
-  *NOTE*: This error is expected on SLAC machines as the distributed
+  *NOTE*: This warning is expected on SLAC machines as the distributed
   swig version is less than required.  Please try running the  
   command first:
 
  >python setup.py build_ext --swig=/u/xo/mgmarino/software/bin/swig
 
-  which should use the correct swig. To bypass this error message
-  and try to continue building, pass the --force flag to the 
-  build command.  As always, be sure to test the installation with
+  which should use the correct swig. 
+  
+  As always, be sure to test the installation with
 
  >python test.py
 
   after completion!
                   """ % swig_version)
-        if self.force: 
-            log.warn("force continue")  
-            return build_ext.swig_sources(self, sources, ext)
-        raise DistutilsExecError("SWIG version") 
+        return build_ext.swig_sources(self, sources, ext)
 
 class PyEXO_build(build):
     sub_commands = [('build_ext',     build.has_ext_modules),

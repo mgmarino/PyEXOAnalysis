@@ -53,19 +53,13 @@ class PyEXOOfflineManager:
         # Be careful of memory management,
         # EXOAnalysisManager now owns this object
         # Don't let python delete it
-        module.thisown = 0
         self.modules.append((nickname,module))
-        self.analysis_mgr.RegisterModule(module, False, nickname)
+        self.analysis_mgr.UseModule(module, nickname)
    
     def run_analysis(self):
         
-        if not self.analysis_mgr.CallTalkTos() == 0:
-            print "Error calling TalkTos"
-            return
         if len(self.modules) == 0: return
         use_string = "use"
-        for name,_ in self.modules: use_string += " " + name
-        self.talk_to.InterpretCommand(use_string)
 
         file_str = "/input/file " + self.filename + "\0"
         self.talk_to.InterpretCommand(file_str)
