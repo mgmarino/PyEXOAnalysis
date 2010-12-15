@@ -17,27 +17,28 @@ class EXOExample(pyexo.EXOAnalysisModule):
     last_array = None
     def set_name_of_output_file(self, name): self.output_filename = name 
 
-    def BeginOfRun(self):
+    def BeginOfRun(self, ED):
         print "Beginning Run"
         print "Initialization done"
         return 0
 
 
-    def BeginOfEvent(self):
+    def BeginOfEvent(self, ED):
         # We can directly access the protected data of EXOAnalysisModule, for example
         # below is accessing self.ED (self is like 'this') which is
         # the EXOEventData
-        if self.ED.nsig == 0: return 0
+        if ED.nsig == 0: return 0
 
-        num_per_event        = self.ED.nele/self.ED.nsig
+        num_per_event        = ED.nele/ED.nsig
         if num_per_event == 0: return 0
         
         # pyexo automatically returns the data array as
         # a numpy array.  No additional data copying, this
         # is fast.
-        anarray              = self.ED.get_data_as_ndarray()
-        chan_array           = self.ED.get_chan_array_as_ndarray()
+        anarray              = ED.get_data_as_ndarray()
+        chan_array           = ED.get_chan_as_ndarray()
         
+        print num_per_event
         # numpy ndarrays are rad, just reshape to get a 2-d
         # array.  Again, no data copying. 
         work_with            = anarray.reshape(-1, num_per_event)
@@ -55,7 +56,6 @@ class EXOExample(pyexo.EXOAnalysisModule):
             pickle.dump(self.last_array, open(self.output_filename, 'wb'))
         except Exception, e:
             print e
-            raise
         
         return 0
 
@@ -86,9 +86,8 @@ def run_analysis(list_of_input_files, output_directory):
         #
         # First a compiled module distributed by
         # EXOAnalysis:
-        input = pyexo.EXOTreeInputModule("EXOTreeInputModule", mgr)
         # Then a module we defined above:
-        wf_analysis = EXOExample("example", mgr)
+        wf_analysis = EXOExample(mgr)
         #############################################
 
 
@@ -98,7 +97,7 @@ def run_analysis(list_of_input_files, output_directory):
         # as the modules will be called in this
         # order in the analysis loop.
         # The name given is just a nickname, 
-        analysis_mgr.register_module(input, "tinput")
+        mgr.UseModule("input")
         analysis_mgr.register_module(wf_analysis, "example")
         mgr.ShowRegisteredModules()
         #############################################

@@ -15,7 +15,7 @@ import_array();
 #include "EXOUtilities/EXOTalkToManager.hh"
 #include "EXOUtilities/EXOEventData.hh"
 #include "EXOCalibUtilities/EXOCalibManager.hh"
-#include "EXOAnalysisManager/EXOTreeInputModule.hh"
+//#include "EXOAnalysisManager/EXOTreeInputModule.hh"
 #include "core/include/numpy/arrayobject.h"
 %}
 %include stl.i
@@ -28,19 +28,62 @@ import_array();
 /* The following allows us to subclass Analysis 
    and Input modules in python. This is especially
    powerful to be able to access all the functionality
-   built in to python or available in python. */
+   built in to python or available in python. 
+
+   The exception handling below is to take care of accessing
+   the GetName function in python.  Classes in C++ can fail at
+   compile-time if this virtual function isn't defined.  python
+   sub-classes don't have that, so we try to handle this by defining
+   GetName as the name of the class through introspection.  Any
+   failures of this introspection result in the exception being 
+   reraised.  It is important to note that that users may still
+   define their own GetName, this just makes sure that everything
+   still works when users don't do so (through either neglect 
+   or willful omission) */
 %exception EXOAnalysisModule::GetName {
     try {
         $action
     } 
-    catch(Swig::DirectorPureVirtualException) { 
-        printf("\npyexo ERROR:                                                                    \n"
-               "Calling EXOAnalysisModule::GetName as a pure virtual.                             \n"
-               "This function (returning a string) needs to be defined in the python class, e.g.: \n"
-               "  class MyClass(pyexo.EXOAnalysisModule):                                         \n"
-               "    def GetName(self): return \"MyClass\"                                         \n"
-               "    ...                                                                         \n\n");
-        Swig::DirectorPureVirtualException::raise("EXOAnalysisModule::GetName");
+    catch(Swig::DirectorPureVirtualException& exc) { 
+        /* This means the user didn't implement GetName.  In principle, this
+           is not a big deal, but we should handle it.  Try to access __name__
+           instead.  If not successful, re-raise the exception.  
+           
+           We use the transparent variable set by the swig wrapping function:
+
+           std::string result.
+           $self is of course a pointer to the python object.
+         */
+      
+        std::string *ptr_of_name = (std::string *)0;
+        PyObject *result_of_class = PyObject_GetAttrString( $self, (char *)"__class__"); 
+        if(!result_of_class) { 
+            PyObject *error_of_class = PyErr_Occurred();
+            if (error_of_class) {
+              Swig::DirectorMethodException::raise("Error detected when calling __class__ for python object derived from 'EXOAnalysisModule'");
+            }
+        }
+        PyObject *result_of_name = PyObject_GetAttrString( result_of_class, (char *)"__name__" );
+        if(!result_of_name) { 
+            PyObject *error_of_name = PyErr_Occurred();
+            if (error_of_name) {
+              Swig::DirectorMethodException::raise("Error detected when calling __name__ for python object derived from 'EXOAnalysisModule'");
+            }
+        }
+        int swig_result_of_name = SWIG_AsPtr_std_string(result_of_name, &ptr_of_name);
+
+        if (!SWIG_IsOK(swig_result_of_name) || !ptr_of_name ) {
+            /* We should never get here, the above calls should always succeed. */
+            printf("\npyexo ERROR:                                                                    \n"
+                   "Calling EXOAnalysisModule::GetName as a pure virtual.                             \n"
+                   "This function (returning a string) needs to be defined in the python class, e.g.: \n"
+                   "  class MyClass(pyexo.EXOAnalysisModule):                                         \n"
+                   "    def GetName(self): return \"MyClass\"                                         \n"
+                   "    ...                                                                         \n\n");
+            exc.raise("EXOAnalysisModule::GetName");
+        }
+        result = *ptr_of_name;
+        PyErr_Clear();
     }
 }
 
@@ -77,7 +120,7 @@ import_array();
 %ignore EXOCalibManager::setMysqlOptions;
 %ignore EXOCalibManager::borrowConnection();
 %include "EXOCalibUtilities/EXOCalibManager.hh"
-%include "EXOAnalysisManager/EXOTreeInputModule.hh"
+//%include "EXOAnalysisManager/EXOTreeInputModule.hh"
 
 /* Following deals with event data. */
 %rename ("_in") EXOEventData::in;

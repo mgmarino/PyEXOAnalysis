@@ -86,19 +86,19 @@ if subprocess.call(['root-config', '--incdir'], stdout=DEVNULL) != 0:
 
 include_dirs.append(subprocess.Popen(['root-config', '--incdir'],
                                      stdout=subprocess.PIPE).communicate()[0].strip())
-lib_dirs.append(subprocess.Popen(['root-config', '--libdir'],
-                                     stdout=subprocess.PIPE).communicate()[0].strip())
+#lib_dirs.append(subprocess.Popen(['root-config', '--libdir'],
+#                                     stdout=subprocess.PIPE).communicate()[0].strip())
 
-temp_root_libs = subprocess.Popen(['root-config', '--libs'],
-                                   stdout=subprocess.PIPE).communicate()[0]
+#temp_root_libs = subprocess.Popen(['root-config', '--libs'],
+#                                   stdout=subprocess.PIPE).communicate()[0]
 
 # Grabbing the library names from root-config
-libs.extend( [ word[2:].strip() for word in temp_root_libs.split() if word[:2] == '-l' ] )
+#libs.extend( [ word[2:].strip() for word in temp_root_libs.split() if word[:2] == '-l' ] )
 
-temp_root_cflags = subprocess.Popen(['root-config', '--cflags'],
-                                      stdout=subprocess.PIPE).communicate()[0]
+#temp_root_cflags = subprocess.Popen(['root-config', '--cflags'],
+#                                      stdout=subprocess.PIPE).communicate()[0]
 
-cpp_flags.extend( [ word.strip() for word in temp_root_cflags.split() if word[:2] != '-I' ] )
+#cpp_flags.extend( [ word.strip() for word in temp_root_cflags.split() if word[:2] != '-I' ] )
 
 swig_flags.extend(['-I' + dir for dir in include_dirs])
 
