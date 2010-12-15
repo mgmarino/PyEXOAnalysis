@@ -83,6 +83,9 @@ import_array();
             exc.raise("EXOAnalysisModule::GetName");
         }
         result = *ptr_of_name;
+
+        /* Making sure we clear the exception, otherwise python will fail on the
+           next Python API call!  */
         PyErr_Clear();
     }
 }
@@ -90,6 +93,7 @@ import_array();
 
 %feature("director") EXOAnalysisModule;
 %feature("director") EXOInputModule;
+%ignore EXOInputModule::filename;
 %include "EXOAnalysisManager/EXOAnalysisModule.hh"
 %include "EXOAnalysisManager/EXOInputModule.hh"
 
@@ -172,6 +176,7 @@ import_array();
 
 %exo_array_as_numpy_array( EXOEventData, ercl,    ncl, NPY_DOUBLE )
 %exo_array_as_numpy_array( EXOEventData, eccl,    ncl, NPY_DOUBLE )
+%exo_array_as_numpy_array( EXOEventData, epcl,    ncl, NPY_DOUBLE )
 %exo_array_as_numpy_array( EXOEventData, eerrcl,  ncl, NPY_DOUBLE )
 %exo_array_as_numpy_array( EXOEventData, xcl,     ncl, NPY_DOUBLE )
 %exo_array_as_numpy_array( EXOEventData, ycl,     ncl, NPY_DOUBLE )
