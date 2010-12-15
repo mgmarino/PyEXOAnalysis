@@ -13,7 +13,7 @@ class EXOFFTWAnalysis(EXOoffline.EXOAnalysisModule):
         self.output_filename = "outputWF_FFT"
         self.plan = None
 
-    def BeginOfRun(self):
+    def BeginOfRun(self, ED):
         print "Beginning Run"
         self.output_dict = {}
         self.open_file = open(self.output_filename, 'wb')
@@ -23,14 +23,14 @@ class EXOFFTWAnalysis(EXOoffline.EXOAnalysisModule):
 
     def set_name_of_output_file(self, name): self.output_filename = name 
 
-    def BeginOfEvent(self):
-        if self.ED.nsig == 0: return 0
-        num_per_event        = self.ED.nele/self.ED.nsig
+    def BeginOfEvent(self, ED):
+        if ED.nsig == 0: return 0
+        num_per_event        = ED.nele/ED.nsig
         if not self.defined_run_size: self.defined_run_size = num_per_event 
         if self.defined_run_size != num_per_event: return 0
 
-        anarray              = self.ED.get_data_as_ndarray()
-        chan_array           = self.ED.get_chan_array_as_ndarray()
+        anarray              = ED.get_data_as_ndarray()
+        chan_array           = ED.get_chan_as_ndarray()
         work_with            = anarray.reshape(-1, num_per_event)
              
         complex_array        = numpy.zeros(num_per_event/2 + 1, dtype=numpy.complex)
@@ -56,7 +56,7 @@ class EXOFFTWAnalysis(EXOoffline.EXOAnalysisModule):
 
         return 0
 
-    def EndOfRun(self):
+    def EndOfRun(self, ED):
         # Here we can serialize everything
         print "Dumping out FFTs"
         try:

@@ -19,7 +19,7 @@ class EXOSimpleWaveformAnalysis(EXOoffline.EXOAnalysisModule):
 
     def set_name_of_output_file(self, name): self.output_filename = name 
 
-    def BeginOfRun(self):
+    def BeginOfRun(self, ED):
         print "Beginning Run"
         self.output_file = ROOT.TFile(self.output_filename, "recreate")
         self.tree = ROOT.TTree("WaveformInfo", "WaveformInfo")
@@ -35,22 +35,22 @@ class EXOSimpleWaveformAnalysis(EXOoffline.EXOAnalysisModule):
         return 0
 
 
-    def BeginOfEvent(self):
-        if self.ED.nsig == 0: return 0
-        num_per_event        = self.ED.nele/self.ED.nsig
+    def BeginOfEvent(self, ED):
+        if ED.nsig == 0: return 0
+        num_per_event        = ED.nele/ED.nsig
         if num_per_event == 0: return 0
         
         # Dealing with time information
-        self.time[0] = self.ED.trigsec*1000000 + self.ED.trigsub
+        self.time[0] = ED.trigsec*1000000 + ED.trigsub
         if self.last_time == 0:
             self.time_since_last[0] = 0
         else:
             self.time_since_last[0] = self.time[0] - self.last_time
         self.last_time = self.time[0]
         
-        self.event_number[0] = self.ED.ne
-        anarray              = self.ED.get_data_as_ndarray()
-        chan_array           = self.ED.get_chan_array_as_ndarray()
+        self.event_number[0] = ED.ne
+        anarray              = ED.get_data_as_ndarray()
+        chan_array           = ED.get_chan_as_ndarray()
         work_with            = anarray.reshape(-1, num_per_event)
         
         # Now event-by-event 
