@@ -8,8 +8,8 @@ import ctypes
 
 
 class EXOFFTWAnalysis(EXOoffline.EXOAnalysisModule):
-    def __init__(self, name, mgr):
-        EXOoffline.EXOAnalysisModule.__init__(self, name, mgr)
+    def __init__(self, mgr):
+        EXOoffline.EXOAnalysisModule.__init__(self, mgr)
         self.output_filename = "outputWF_FFT"
         self.plan = None
 

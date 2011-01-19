@@ -5,8 +5,8 @@ import numpy
 from ctypes import c_ulonglong
 
 class EXOSimpleWaveformAnalysis(EXOoffline.EXOAnalysisModule):
-    def __init__(self, name, mgr):
-        EXOoffline.EXOAnalysisModule.__init__(self, name, mgr)
+    def __init__(self, mgr):
+        EXOoffline.EXOAnalysisModule.__init__(self, mgr)
         self.baseline        = array.array('d', [0])
         self.maximum         = array.array('i', [0])
         self.minimum         = array.array('i', [0])
